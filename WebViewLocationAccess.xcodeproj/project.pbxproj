@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		CBB22D6E245BC6D700A1EC3B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBB22D6D245BC6D700A1EC3B /* AppDelegate.swift */; };
-		CBB22D72245BC6D700A1EC3B /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBB22D71245BC6D700A1EC3B /* ViewController.swift */; };
 		CBB22D77245BC6DA00A1EC3B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CBB22D76245BC6DA00A1EC3B /* Assets.xcassets */; };
 		CBB22D7A245BC6DA00A1EC3B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CBB22D78245BC6DA00A1EC3B /* LaunchScreen.storyboard */; };
 		CBB22D83245BC99F00A1EC3B /* HNZLocationWebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBB22D82245BC99F00A1EC3B /* HNZLocationWebViewController.swift */; };
@@ -19,7 +18,6 @@
 /* Begin PBXFileReference section */
 		CBB22D6A245BC6D700A1EC3B /* WebViewLocationAccess.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WebViewLocationAccess.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CBB22D6D245BC6D700A1EC3B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		CBB22D71245BC6D700A1EC3B /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		CBB22D76245BC6DA00A1EC3B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		CBB22D79245BC6DA00A1EC3B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		CBB22D7B245BC6DA00A1EC3B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -61,7 +59,6 @@
 				CBB22D86245BCCCF00A1EC3B /* Binding */,
 				CBB22D81245BC95E00A1EC3B /* Controllers */,
 				CBB22D6D245BC6D700A1EC3B /* AppDelegate.swift */,
-				CBB22D71245BC6D700A1EC3B /* ViewController.swift */,
 				CBB22D76245BC6DA00A1EC3B /* Assets.xcassets */,
 				CBB22D78245BC6DA00A1EC3B /* LaunchScreen.storyboard */,
 				CBB22D7B245BC6DA00A1EC3B /* Info.plist */,
@@ -157,7 +154,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CBB22D72245BC6D700A1EC3B /* ViewController.swift in Sources */,
 				CBB22D85245BC9F500A1EC3B /* HNZLocationWebViewModel.swift in Sources */,
 				CBB22D6E245BC6D700A1EC3B /* AppDelegate.swift in Sources */,
 				CBB22D88245BCCDE00A1EC3B /* Box.swift in Sources */,

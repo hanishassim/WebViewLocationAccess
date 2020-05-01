@@ -154,7 +154,10 @@ extension HNZLocationWebViewController: WKScriptMessageHandler {
             if messageBody == "getCurrentPosition" {
                 let script = """
                 getLocation(\(locationManager.location?.coordinate.latitude ?? 0) ,\(locationManager.location?.coordinate.longitude ?? 0));
-                alert('hey1234'); alert(this.id);
+                
+                alert('hey1234');
+                
+                alert(this.id);
                 """
                 
                 webView.evaluateJavaScript(script)
@@ -217,7 +220,7 @@ extension HNZLocationWebViewController: WKUIDelegate, WKNavigationDelegate, UISc
     
     func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
         let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
-        let title = NSLocalizedString("OK", comment: "ok Button")
+        let title = NSLocalizedString("OK", comment: "")
         
         let ok = UIAlertAction(title: title, style: .default) { (action: UIAlertAction) -> Void in
             alert.dismiss(animated: true, completion: nil)
