@@ -1,5 +1,6 @@
 # WebViewLocationAccess
 POC for accessing app location data from webView
+This will bypass the allow location access alert
 
 <img width="400" alt="SimulatorPreview" src="https://user-images.githubusercontent.com/4571502/80780337-3eedf880-8ba1-11ea-8c84-64efe57111e9.png">
 
