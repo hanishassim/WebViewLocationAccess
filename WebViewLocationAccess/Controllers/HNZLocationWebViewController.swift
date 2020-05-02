@@ -29,38 +29,6 @@ class HNZLocationWebViewController: UIViewController {
         let config = WKWebViewConfiguration()
         config.userContentController = contentController
         
-        let scriptSource = """
-            navigator.geolocation.getCurrentPosition = function(success, error, { timeout:5000, enableHighAccuracy:true }) {
-                var id = this.helper.id();
-                this.helper.listeners[id] = { onetime: true, success: success || this.noop, error: error || this.noop };
-                window.webkit.messageHandlers.listenerAdded.postMessage('');
-                window.webkit.messageHandlers.locationHandler.postMessage('getCurrentPosition'); // to trigger webkit
-
-                return id;
-            };
-
-            navigator.geolocation.watchPosition = function(success, error, { timeout:5000, enableHighAccuracy:true }) {
-                var id = this.helper.id();
-                this.helper.listeners[id] = { onetime: false, success: success || this.noop, error: error || this.noop };
-                window.webkit.messageHandlers.listenerAdded.postMessage('');
-                window.webkit.messageHandlers.locationHandler.postMessage('getCurrentPosition'); // to trigger webkit
-
-                return id;
-            };
-
-            // For use with watchPosition()
-            navigator.geolocation.clearWatch = function(id) {
-                var idExists = this.helper.listeners[id] ? true : false;
-                if idExists {
-                    this.helper.listeners[id] = null;
-                    delete this.helper.listeners[id];
-                    window.webkit.messageHandlers.listenerRemoved.postMessage('');
-                }
-            };
-        """
-        let script = WKUserScript(source: scriptSource, injectionTime: .atDocumentEnd, forMainFrameOnly: true)
-        contentController.addUserScript(script)
-        
         let webView = WKWebView(frame: .zero, configuration: config)
         webView.uiDelegate = self
         webView.navigationDelegate = self
@@ -133,8 +101,13 @@ class HNZLocationWebViewController: UIViewController {
 extension HNZLocationWebViewController: CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         if let location = locations.last {
+            // To fetch location data
             let script =
-            "navigator.geolocation.helper.success('\(location.timestamp)', \(location.coordinate.latitude), \(location.coordinate.longitude), \(location.altitude), \(location.horizontalAccuracy), \(location.verticalAccuracy), \(location.course), \(location.speed));"
+            """
+            navigator.geolocation.helper.success('\(location.timestamp)', \(location.coordinate.latitude), \(location.coordinate.longitude), \(location.altitude), \(location.horizontalAccuracy), \(location.verticalAccuracy), \(location.course), \(location.speed));
+            
+            alert('Hey I know your location!');
+            """
             
             webView.evaluateJavaScript(script)
         }
@@ -154,10 +127,6 @@ extension HNZLocationWebViewController: WKScriptMessageHandler {
             if messageBody == "getCurrentPosition" {
                 let script = """
                 getLocation(\(locationManager.location?.coordinate.latitude ?? 0) ,\(locationManager.location?.coordinate.longitude ?? 0));
-                
-                alert('hey1234');
-                
-                alert(this.id);
                 """
                 
                 webView.evaluateJavaScript(script)
@@ -211,23 +180,96 @@ extension HNZLocationWebViewController {
 
 extension HNZLocationWebViewController: WKUIDelegate, WKNavigationDelegate, UIScrollViewDelegate {
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        //        let script = "window.webkit.messageHandlers.locationHandler.postMessage('getCurrentPosition');"
-        //
-        //        webView.evaluateJavaScript(script)
-        //
-        //        print("loaded!!!!!")
+        let script = """
+            // management for success and error listeners and its calling
+
+            navigator.geolocation.helper = {
+                listeners: {},
+                noop: function() {},
+                id: function() {
+                    var min = 1, max = 1000;
+                    return Math.floor(Math.random() * (max - min + 1)) + min;
+                },
+                clear: function(isError) {
+                    for (var id in this.listeners) {
+                        if (isError || this.listeners[id].onetime) {
+                            navigator.geolocation.clearWatch(id);
+                        }
+                    }
+                },
+                success: function(timestamp, latitude, longitude, altitude, accuracy, altitudeAccuracy, heading, speed) {
+                    var position = {
+                        timestamp: new Date(timestamp).getTime() || new Date().getTime(), // safari can not parse date format returned by swift e.g. 2019-12-27 15:46:59 +0000 (fallback used because we trust that safari will learn it in future because chrome knows that format)
+                        coords: {
+                            latitude: latitude,
+                            longitude: longitude,
+                            altitude: altitude,
+                            accuracy: accuracy,
+                            altitudeAccuracy: altitudeAccuracy,
+                            heading: (heading > 0) ? heading : null,
+                            speed: (speed > 0) ? speed : null
+                        }
+                    };
+                    for (var id in this.listeners) {
+                        this.listeners[id].success(position);
+                    }
+                    this.clear(false);
+                },
+                error: function(code, message) {
+                    var error = {
+                        PERMISSION_DENIED: 1,
+                        POSITION_UNAVAILABLE: 2,
+                        TIMEOUT: 3,
+                        code: code,
+                        message: message
+                    };
+                    for (var id in this.listeners) {
+                        this.listeners[id].error(error);
+                    }
+                    this.clear(true);
+                }
+            };
+
+            // @override getCurrentPosition()
+            navigator.geolocation.getCurrentPosition = function(success, error, options) {
+                var id = this.helper.id();
+                this.helper.listeners[id] = { onetime: true, success: success || this.noop, error: error || this.noop };
+                window.webkit.messageHandlers.listenerAdded.postMessage("");
+            };
+
+            // @override watchPosition()
+            navigator.geolocation.watchPosition = function(success, error, options) {
+                var id = this.helper.id();
+                this.helper.listeners[id] = { onetime: false, success: success || this.noop, error: error || this.noop };
+                window.webkit.messageHandlers.listenerAdded.postMessage("");
+                return id;
+            };
+
+            // @override clearWatch()
+            navigator.geolocation.clearWatch = function(id) {
+                var idExists = (this.helper.listeners[id]) ? true : false;
+                if (idExists) {
+                    this.helper.listeners[id] = null;
+                    delete this.helper.listeners[id];
+                    window.webkit.messageHandlers.listenerRemoved.postMessage("");
+                }
+            };
+        """;
+        
+        webView.evaluateJavaScript(script)
     }
     
     func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
-        let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
-        let title = NSLocalizedString("OK", comment: "")
-        
-        let ok = UIAlertAction(title: title, style: .default) { (action: UIAlertAction) -> Void in
-            alert.dismiss(animated: true, completion: nil)
-        }
-        
-        alert.addAction(ok)
-        present(alert, animated: true)
+        //        let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
+        //        let title = NSLocalizedString("OK", comment: "")
+        //
+        //        let ok = UIAlertAction(title: title, style: .default) { (action: UIAlertAction) -> Void in
+        //            alert.dismiss(animated: true, completion: nil)
+        //        }
+        //
+        //        alert.addAction(ok)
+        //        present(alert, animated: true)
+        print(message)
         
         completionHandler()
     }
