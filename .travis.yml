@@ -4,3 +4,9 @@ xcode_scheme: WebViewLocationAccess
 xcode_destination: platform=iOS Simulator,OS=13.2,name=iPhone 11
 osx_image: xcode11.3
 os: osx
+
+branches:
+  except: # blocklist
+  - master
+  only: # safelist
+  - develop
